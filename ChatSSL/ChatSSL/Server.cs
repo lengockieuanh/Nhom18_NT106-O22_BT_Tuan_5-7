@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Security;
@@ -90,8 +91,27 @@ namespace ChatSSL
                         int bytesRead = stream.Read(buffer, 0, buffer.Length);
                         // Encode bytes array to get perfect message
                         string data = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-                        // Show message
-                        AppendText(data);
+                        string[] parts = data.Split('/');
+                        if (data.Contains("\""))
+                        { 
+                            // Đọc dữ liệu hình ảnh từ luồng
+                            MemoryStream ms = new MemoryStream();
+                            int read;
+                            while ((read = stream.Read(buffer, 0, buffer.Length)) > 0)
+                            {
+                                ms.Write(buffer, 0, read);
+                            }
+                            // Tạo hình ảnh từ dữ liệu
+                            Image image = Image.FromStream(ms);
+                            // Hiển thị hình ảnh trên PictureBox
+                            pictureBox1.Image = image;
+                            ms.Close(); // Đóng MemoryStream sau khi sử dụng
+                        }
+
+                        else
+                            // Show message
+                            AppendText(data);
+
                     }
                 }
                 catch (SocketException ex)
@@ -131,7 +151,8 @@ namespace ChatSSL
         private void Server_FormClosing(object sender, FormClosingEventArgs e)
         {
             // Stop the server
-            server.Stop();
+            if(server != null)
+                server.Stop();
             // Stop listen thread
             if (listenThread != null && listenThread.IsAlive)
             {

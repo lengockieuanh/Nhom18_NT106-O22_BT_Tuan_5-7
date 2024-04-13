@@ -36,6 +36,8 @@ namespace ChatSSL
             this.tbIPServer = new System.Windows.Forms.TextBox();
             this.rtbView = new System.Windows.Forms.RichTextBox();
             this.label1 = new System.Windows.Forms.Label();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
             // btnListen
@@ -98,11 +100,20 @@ namespace ChatSSL
             this.label1.TabIndex = 24;
             this.label1.Text = "SERVER";
             // 
+            // pictureBox1
+            // 
+            this.pictureBox1.Location = new System.Drawing.Point(582, 142);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(165, 167);
+            this.pictureBox1.TabIndex = 31;
+            this.pictureBox1.TabStop = false;
+            // 
             // Server
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(853, 502);
+            this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.btnListen);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.label4);
@@ -113,6 +124,7 @@ namespace ChatSSL
             this.Name = "Server";
             this.Text = "Server";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Server_FormClosing);
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -127,5 +139,6 @@ namespace ChatSSL
         private System.Windows.Forms.TextBox tbIPServer;
         private System.Windows.Forms.RichTextBox rtbView;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.PictureBox pictureBox1;
     }
 }

@@ -14,6 +14,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Security.Authentication;
 using System.IO;
 
+
 namespace ChatSSL
 {
     public partial class Client : Form
@@ -54,13 +55,11 @@ namespace ChatSSL
 
         private void btnSend_Click(object sender, EventArgs e)
         {
-            client = new TcpClient();
-            // Define IP Endpoint of server
+            client = new TcpClient();            
             IPAddress ipadd = IPAddress.Parse(tbIPServer.Text);
             int port = Convert.ToInt32(tbPort.Text);
             IPEndPoint ipend = new IPEndPoint(ipadd, port);
-            var clientCertificate = getServerCert();
-            // Connect client to server by using IP endpoint
+            var clientCertificate = getServerCert();           
             try
             {
                 client.Connect(ipend);
@@ -70,25 +69,56 @@ namespace ChatSSL
                 MessageBox.Show(ex.ToString());
                 return;
             }
-            // Create stream to write message
+            
             NetworkStream stream = client.GetStream();
 
             this.mySslStream = new SslStream(client.GetStream());
             this.mySslStream.AuthenticateAsClient("MySslSocketCertificate", new X509CertificateCollection(new X509Certificate[] { clientCertificate }), SslProtocols.Tls12, false);
 
             string message = tbUserName.Text + ": " + tbMessage.Text;
-            rtbView.AppendText(message + "\r\n");
-            // Encode message from string to bytes
-            Byte[] sendBytes = Encoding.UTF8.GetBytes(message);
-            // Write message into stream
-            stream.Write(sendBytes, 0, sendBytes.Length);
-            // Message textbox will be empty then
-            tbMessage.Text = "";
-            // Dispose client but the connection is still kept
+            rtbView.AppendText(message + "\r\n");            
+            Byte[] sendBytes = Encoding.UTF8.GetBytes(message);            
+            stream.Write(sendBytes, 0, sendBytes.Length);            
+            tbMessage.Text = "";            
             if (client != null)
             {
                 client.Close();
             }
-        }        
+        }
+
+        private void Sendimg_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "Image Files (*.jpg, *.jpeg, *.png) | *.jpg; *.jpeg; *.png";
+            
+
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    // Đọc dữ liệu từ tệp hình ảnh
+                    byte[] imageData = File.ReadAllBytes(openFileDialog.FileName);
+
+                    // Kết nối đến máy chủ
+                    client = new TcpClient(tbIPServer.Text, int.Parse(tbPort.Text));
+                    var clientCertificate = getServerCert();
+                    this.mySslStream = new SslStream(client.GetStream());
+                    this.mySslStream.AuthenticateAsClient("MySslSocketCertificate", new X509CertificateCollection(new X509Certificate[] { clientCertificate }), SslProtocols.Tls12, false);
+                    // Gửi dữ liệu hình ảnh qua kết nối TCP
+                    NetworkStream stream = client.GetStream();
+                    stream.Write(imageData, 0, imageData.Length);
+
+                    MessageBox.Show("Image sent successfully!");
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("An error occurred while sending the image: " + ex.Message);
+                }
+                finally
+                {
+                    client?.Close();
+                }
+            }
+        }
     }
 }
