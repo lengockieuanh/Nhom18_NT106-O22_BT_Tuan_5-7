@@ -16,5 +16,17 @@ namespace ChatSSL
         {
             InitializeComponent();
         }
+
+        private void btServer_Click(object sender, EventArgs e)
+        {
+            Server server = new Server();
+            server.Show();
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            Client client = new Client();
+            client.Show();
+        }
     }
 }
