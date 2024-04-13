@@ -5,7 +5,10 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Net;
+using System.Net.Security;
 using System.Net.Sockets;
+using System.Security.Authentication;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,6 +25,39 @@ namespace ChatSSL
         {
             InitializeComponent();
         }
+        private static X509Certificate getServerCert()
+        {
+            X509Store store = new X509Store(StoreName.My,
+                StoreLocation.CurrentUser);
+            store.Open(OpenFlags.ReadOnly);
+
+            X509Certificate2 foundCertificate = null;
+            foreach (X509Certificate2 currentCertificate
+                in store.Certificates)
+            {
+                if (currentCertificate.IssuerName.Name
+                    != null && currentCertificate.IssuerName.
+                        Name.Equals("CN=MySslSocketCertificate"))
+                {
+                    foundCertificate = currentCertificate;
+                    break;
+                }
+            }
+            return foundCertificate;
+        }
+
+        static bool ValidateCertificate(Object sender,
+            X509Certificate certificate, X509Chain chain,
+            SslPolicyErrors sslPolicyErrors)
+        {
+            if (sslPolicyErrors ==
+                SslPolicyErrors.RemoteCertificateChainErrors)
+            { return true; }
+            if (sslPolicyErrors == SslPolicyErrors.None)
+            { return true; }
+            return false;
+        }
+
         public void ServerListen()
         {
             // Create server by using IP endpoint
@@ -30,6 +66,7 @@ namespace ChatSSL
             IPEndPoint ipend = new IPEndPoint(ipadd, port);
             server = new TcpListener(ipend);
             // Start the server
+
             server.Start();
             // Define listen thread
             listenThread = new Thread(() =>
@@ -40,6 +77,11 @@ namespace ChatSSL
                     {
                         // Create client connect to server
                         TcpClient client = server.AcceptTcpClient();
+                        var serverCertificate = getServerCert();
+
+                        SslStream ssl = new SslStream(client.GetStream(), false, ValidateCertificate);
+
+                        ssl.AuthenticateAsServer(serverCertificate,true, SslProtocols.Tls12, false);                                            
                         // Get data from client
                         NetworkStream stream = client.GetStream();
                         // Create array to store encoded message
